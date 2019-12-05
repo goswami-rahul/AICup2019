@@ -1,0 +1,1 @@
+Repository for [AI Cup 2019](https://russianaicup.ru/) 
