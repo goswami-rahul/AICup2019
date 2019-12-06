@@ -6,6 +6,14 @@ double distanceSqr(Vec2Double a, Vec2Double b) {
   return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 }
 
+Vec2Float getDebugPos(const Vec2Double &pos, const Vec2Double &size) {
+  return Vec2Float(pos.x - size.x / 2, pos.y);
+}
+
+const ColorFloat RED   (1, 0, 0, 1);
+const ColorFloat GREEN (0, 1, 0, 1);
+const ColorFloat BLUE  (0, 0, 1, 1);
+
 UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
                                  Debug &debug) {
   const Unit *nearestEnemy = nullptr;
@@ -29,13 +37,25 @@ UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
     }
   }
   Vec2Double targetPos = unit.position;
+  Vec2Double targetSize = unit.size;
   if (unit.weapon == nullptr && nearestWeapon != nullptr) {
     targetPos = nearestWeapon->position;
+    targetSize = nearestWeapon->size;
   } else if (nearestEnemy != nullptr) {
     targetPos = nearestEnemy->position;
+    targetSize = nearestEnemy->size;
   }
-  debug.draw(CustomData::Log(
+
+  {
+    debug.draw(CustomData::Log(
       std::string("Target pos: ") + targetPos.toString()));
+    debug.draw(CustomData::Rect(
+      getDebugPos(targetPos, targetSize), 
+      Vec2Float(targetSize.x, targetSize.y),
+      RED
+    ));
+  }
+
   Vec2Double aim = Vec2Double(0, 0);
   if (nearestEnemy != nullptr) {
     aim = Vec2Double(nearestEnemy->position.x - unit.position.x,
@@ -59,7 +79,7 @@ UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
   action.aim = aim;
   action.shoot = true;
   action.reload = false;
-  action.swapWeapon = false;
+  action.swapWeapon = true;
   action.plantMine = false;
   return action;
 }
