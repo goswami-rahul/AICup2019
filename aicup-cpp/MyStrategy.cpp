@@ -10,6 +10,10 @@ Vec2Float getDebugPos(const Vec2Double &pos, const Vec2Double &size) {
   return Vec2Float(pos.x - size.x / 2, pos.y);
 }
 
+Vec2Double operator * (const Vec2Double &lhs, const double &rhs) {
+  return Vec2Double(lhs.x * rhs, lhs.y * rhs);
+}
+
 const ColorFloat RED   (1, 0, 0, 1);
 const ColorFloat GREEN (0, 1, 0, 1);
 const ColorFloat BLUE  (0, 0, 1, 1);
@@ -74,6 +78,11 @@ UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
   }
   UnitAction action;
   action.velocity = targetPos.x - unit.position.x;
+  if (action.velocity >= 0.0) {
+    action.velocity = std::max(action.velocity, game.properties.unitMaxHorizontalSpeed);
+  } else {
+    action.velocity = std::min(action.velocity, -game.properties.unitMaxHorizontalSpeed);
+  }
   action.jump = jump;
   action.jumpDown = !action.jump;
   action.aim = aim;
