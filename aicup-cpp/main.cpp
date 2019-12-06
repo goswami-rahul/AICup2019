@@ -1,14 +1,14 @@
+#include <memory>
+#include <string>
+#include <unordered_map>
 #include "Debug.hpp"
 #include "MyStrategy.hpp"
 #include "TcpStream.hpp"
 #include "model/PlayerMessageGame.hpp"
 #include "model/ServerMessageGame.hpp"
-#include <memory>
-#include <string>
-#include <unordered_map>
 
 class Runner {
-public:
+ public:
   Runner(const std::string &host, int port, const std::string &token) {
     std::shared_ptr<TcpStream> tcpStream(new TcpStream(host, port));
     inputStream = getInputStream(tcpStream);
@@ -21,7 +21,7 @@ public:
     Debug debug(outputStream);
     while (true) {
       auto message = ServerMessageGame::readFrom(*inputStream);
-      const auto& playerView = message.playerView;
+      const auto &playerView = message.playerView;
       if (!playerView) {
         break;
       }
@@ -38,7 +38,7 @@ public:
     }
   }
 
-private:
+ private:
   std::shared_ptr<InputStream> inputStream;
   std::shared_ptr<OutputStream> outputStream;
 };

@@ -40,7 +40,7 @@ TcpStream::TcpStream(const std::string &host, int port) {
 }
 
 class TcpInputStream : public InputStream {
-public:
+ public:
   TcpInputStream(std::shared_ptr<TcpStream> tcpStream)
       : tcpStream(tcpStream), bufferPos(0), bufferSize(0) {}
   void readBytes(char *buffer, size_t byteCount) {
@@ -71,7 +71,7 @@ public:
     }
   }
 
-private:
+ private:
   static const size_t BUFFER_CAPACITY = 8 * 1024;
   char buffer[BUFFER_CAPACITY];
   size_t bufferPos;
@@ -80,7 +80,7 @@ private:
 };
 
 class TcpOutputStream : public OutputStream {
-public:
+ public:
   TcpOutputStream(std::shared_ptr<TcpStream> tcpStream)
       : tcpStream(tcpStream), bufferPos(0), bufferSize(0) {}
   void writeBytes(const char *buffer, size_t byteCount) {
@@ -111,7 +111,7 @@ public:
     bufferPos = 0;
   }
 
-private:
+ private:
   static const size_t BUFFER_CAPACITY = 8 * 1024;
   char buffer[BUFFER_CAPACITY];
   size_t bufferPos;
@@ -119,12 +119,12 @@ private:
   std::shared_ptr<TcpStream> tcpStream;
 };
 
-std::shared_ptr<InputStream>
-getInputStream(std::shared_ptr<TcpStream> tcpStream) {
+std::shared_ptr<InputStream> getInputStream(
+    std::shared_ptr<TcpStream> tcpStream) {
   return std::shared_ptr<TcpInputStream>(new TcpInputStream(tcpStream));
 }
 
-std::shared_ptr<OutputStream>
-getOutputStream(std::shared_ptr<TcpStream> tcpStream) {
+std::shared_ptr<OutputStream> getOutputStream(
+    std::shared_ptr<TcpStream> tcpStream) {
   return std::shared_ptr<TcpOutputStream>(new TcpOutputStream(tcpStream));
 }
