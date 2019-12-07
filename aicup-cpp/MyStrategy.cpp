@@ -1,4 +1,5 @@
 #include "MyStrategy.hpp"
+#include<limits>
 
 MyStrategy::MyStrategy() {}
 
@@ -71,19 +72,41 @@ UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
   if (unit.weapon == nullptr && nearestWeapon != nullptr) {
     targetPos = nearestWeapon->position;
     targetSize = nearestWeapon->size;
-  } else if (nearestEnemy != nullptr) {
-    targetPos = nearestEnemy->position;
-    targetSize = nearestEnemy->size;
+    debug.draw(CustomData::Log(
+      std::string("Going to Weapon !"))
+    );
+  } else if (unit.health < game.properties.unitMaxHealth) {
+    targetPos = nearestHealthPack->position;
+    targetSize = nearestHealthPack->size;
+    debug.draw(CustomData::Log(
+      std::string("Going to Heath Pack ! (" +
+        std::to_string(unit.health) + 
+        "/" +
+        std::to_string(game.properties.unitMaxHealth) +
+        ")"
+      ))
+    );
+  } else {
+    targetPos = nearestWeapon->position;
+    targetSize = nearestWeapon->size;
+    debug.draw(CustomData::Log(
+      std::string("Going to Weapon !"))
+    );
   }
+  // else if (nearestEnemy != nullptr) {
+  //   targetPos = nearestEnemy->position;
+  //   targetSize = nearestEnemy->size;
+  // }
 
   {
     debug.draw(CustomData::Log(
-      std::string("Target pos: ") + targetPos.toString()));
+      std::string("Target pos: ") + targetPos.toString())
+    );
     debug.draw(CustomData::Rect(
       getDebugPos(targetPos, targetSize), 
       Vec2Float((float)targetSize.x, (float)targetSize.y),
-      BLUE
-    ));
+      BLUE)
+    );
   }
 
   Vec2Double aim = Vec2Double(0, 0);
