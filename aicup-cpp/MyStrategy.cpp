@@ -7,7 +7,7 @@ double distanceSqr(Vec2Double a, Vec2Double b) {
 }
 
 Vec2Float getDebugPos(const Vec2Double &pos, const Vec2Double &size) {
-  return Vec2Float(pos.x - size.x / 2, pos.y);
+  return Vec2Float((float)(pos.x - size.x / 2), (float)pos.y);
 }
 
 Vec2Double operator * (const Vec2Double &lhs, const double &rhs) {
@@ -17,6 +17,32 @@ Vec2Double operator * (const Vec2Double &lhs, const double &rhs) {
 const ColorFloat RED   (1, 0, 0, 1);
 const ColorFloat GREEN (0, 1, 0, 1);
 const ColorFloat BLUE  (0, 0, 1, 1);
+
+template <class ItemType>
+std::shared_ptr<const LootBox> 
+nearestLootBoxWithItem(const Unit &unit, const Game &game) {
+  std::shared_ptr<const LootBox> nearestItem;
+  double bestDistanceSqr = std::numeric_limits<double>::max();
+  for (const LootBox &lootBox : game.lootBoxes) {
+    if (std::dynamic_pointer_cast<ItemType>(lootBox.item)) {
+      const double nowDistanceSqr = distanceSqr(unit.position, lootBox.position);
+      if (nowDistanceSqr < bestDistanceSqr) {
+        nearestItem = std::make_shared<const LootBox>(lootBox);
+        bestDistanceSqr = nowDistanceSqr;
+      }
+    }
+  }
+  return nearestItem;
+}
+
+template <class Item>
+void debugItem(Debug &debug, const Item &item, const ColorFloat &color = RED) {
+  debug.draw(CustomData::Rect(
+    getDebugPos(item->position, item->size), 
+    Vec2Float((float)item->size.x, (float)item->size.y),
+    color
+  ));
+}
 
 UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
                                  Debug &debug) {
@@ -30,16 +56,16 @@ UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
       }
     }
   }
-  const LootBox *nearestWeapon = nullptr;
-  for (const LootBox &lootBox : game.lootBoxes) {
-    if (std::dynamic_pointer_cast<Item::Weapon>(lootBox.item)) {
-      if (nearestWeapon == nullptr ||
-          distanceSqr(unit.position, lootBox.position) <
-              distanceSqr(unit.position, nearestWeapon->position)) {
-        nearestWeapon = &lootBox;
-      }
-    }
+  std::shared_ptr<const LootBox> nearestWeapon = 
+    nearestLootBoxWithItem<Item::Weapon>(unit, game);
+  std::shared_ptr<const LootBox> nearestHealthPack = 
+    nearestLootBoxWithItem<Item::HealthPack>(unit, game);
+  
+  {
+    debugItem(debug, nearestWeapon, RED);
+    debugItem(debug, nearestHealthPack, GREEN);
   }
+
   Vec2Double targetPos = unit.position;
   Vec2Double targetSize = unit.size;
   if (unit.weapon == nullptr && nearestWeapon != nullptr) {
@@ -55,8 +81,8 @@ UnitAction MyStrategy::getAction(const Unit &unit, const Game &game,
       std::string("Target pos: ") + targetPos.toString()));
     debug.draw(CustomData::Rect(
       getDebugPos(targetPos, targetSize), 
-      Vec2Float(targetSize.x, targetSize.y),
-      RED
+      Vec2Float((float)targetSize.x, (float)targetSize.y),
+      BLUE
     ));
   }
 
